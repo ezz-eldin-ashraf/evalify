@@ -9,16 +9,128 @@
     <!-- css styles -->
        <link rel="stylesheet" href="CSS/style.css">
     <!-- CDN Tailwind -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
+      <!-- CDN Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // primary color اللون البنفسجى
+                        'brand-purple': '#4F46E5',
+                        //الخلفية الفاتحة
+                        'brand-light': '#E0E6FC',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
 <body>
 
-    
-    <div class="flex justify-center -space-x-14">
-        <div class="mix-blend-multiply bg-blue-400 rounded-full w-24 h-24"></div>
-        <div class="mix-blend-multiply bg-pink-400 rounded-full w-24 h-24"></div>
-    </div>
+  <!-- 1-header  -->
+    <nav class="flex justify-between h-20 bg-white items-center px-12 ">
+        <div class="flex items-center">
+            <img src="images/cb8b81f3f695ccaa88a2a199a16d5e49e712edf3.png" alt="Logo" class="h-20 w-30 mr-2">
+        </div>
+        <ul class="flex items-center space-x-9">
+            <li> <a href="#home" class="text-black hover:text-gray-600 font-bold">Home</a></li>
+            <li><a href="#about" class="text-black hover:text-gray-600 font-bold">About</a></li>
+            <li><a href="#contact" class="text-black hover:text-gray-600 font-bold">Contact us</a></li>
+        </ul>
+        <div class="flex items-center space-x-4">
+            <button class="bg-brand-purple text-white px-2 py-2 rounded w-28  cursor-pointer">Login</button>
+            <button
+                class="bg-white text-brand-purple px-2 py-2 rounded w-28 border-2 border-brand-purple hover:bg-brand-purple hover:text-white cursor-pointer">Sign
+                Up</button>
+        </div>
+    </nav>
+
+    <!-- ////////////////////////////////////////////////////////////////// -->
+    <!-- 2-Main section -->
+    <main id="home"
+        class="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 py-12 bg-brand-light min-h-[600px] drop-shadow-lg shadow-gray-400">
+
+        <div class="text-left md:w-1/2 space-y-6 order-2 md:order-1">
+
+            <!-- Content -->
+            <!-- مقاسات الصور من figma  -->
+            <div class="flex items-center gap-2 mb-1">
+                <!-- الصورة المقصوصة  -->
+                <img src="images/cb8b81f3f695ccaa88a2a199a16d5e49e712edf3(1)(1).png" alt="logo"
+                    class="w-[388px] h-[145px] object-contain">
+            </div>
+
+            <h2 class="text-5xl font-bold text-gray-900 leading-tight">
+                Electronic Exam Grading
+            </h2>
+
+            <p class="text-lg text-gray-600 max-w-fit leading-relaxed">
+                Automate handwritten exam evaluation using AI and computer vision.
+                Automate handwritten exam evaluation using AI and computer vision.
+            </p>
+
+            <div class="pt-4 flex justify-center">
+                <button
+                    class="bg-brand-purple text-white px-10 py-3 rounded-md shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-500 cursor-pointer font-semibold text-lg">
+                    Start Now
+                </button>
+            </div>
+        </div>
+
+        <!-- 2-Main image -->
+        <div class="md:w-1/2 flex justify-center order-1 md:order-2 mb-10 md:mb-0">
+            <img src="images/42f6c0980edf150b38ac6f2380dbd43649090a4b.png" alt="AI Grading Robot"
+                class="w-full max-w-lg object-contain drop-shadow-2xl">
+        </div>
+    </main>
+    <!-- /////////////////////////////////////////////////////////////// -->
+
+    <!-- 3-section  about us  -->
+    <section id="about"
+        class="flex flex-col md:flex-row items-center justify-between px-8 md:px-20 py-12 bg-white min-h-[500px] shadow-lg ">
+
+        <div class="text-left md:w-1/2 space-y-6">
+            <h1 class="text-brand-purple text-3xl font-semibold">About Us </h1>
+            <p class="text-xl  leading-relaxed">Modern efficiency by automating exam correction and providing deep
+                insights into student performance ,we
+                eliminate administrative burdens.We offer an intuitive all-in-one ecosystem where instructors can mange
+                workflows effortlessly</p>
+        </div>
+        <div class="">
+            <img src="images/37a0f022b3f927f67da6be6f1c522900feeced8d.png" alt="" class="w-[525px] h-[350px]">
+        </div>
+    </section>
+
+    <!-- //////////////////////////////////////////////////////////// -->
+
+    <!-- 4-Footer   -->
+    <footer id="contact" class="flex  md:flex-row items-center justify-between h-[60px] px-10 bg-brand-light">
+        <div class="flex items-center">
+            <img src="images/cb8b81f3f695ccaa88a2a199a16d5e49e712edf3.png" alt="Logo" class="h-20 w-30 mr-2">
+        </div>
+
+        <p class="text-[#978E8E]">Copyright © 2026 All rights reserved </p>
+
+        <div class="flex">
+            <!-- social icons SVG -->
+            <div class="flex items-center gap-4 ">
+                <a href=""><img src="images/facebook-network-communication-internet-interaction-svgrepo-com.svg"
+                        alt="Facebook Icon" class="w-[20px] h-[20px] object-contain"></a>
+
+                <a href=""><img src="images/gmail-svgrepo-com.svg" alt="Gmail Icon"
+                        class="w-[20px] h-[20px] object-contain"></a>
+
+                <a href=""> <img src="images/whatsapp-symbol-logo-svgrepo-com.svg" alt="Whatsapp Icon"
+                        class="w-[20px] h-[20px] object-contain"></a>
+            </div>
+        </div>
+    </footer>
+
 
     <script src="JS/script.js"></script>
 </body>
