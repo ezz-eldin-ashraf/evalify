@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   FileText, 
@@ -7,9 +7,12 @@ import {
   Clock, 
   UploadCloud, 
   PlayCircle,
-  MoreVertical
+  MoreVertical,
+  Plus,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 
 // --- Mock Data ---
 const STATS = [
@@ -19,15 +22,33 @@ const STATS = [
   { id: 4, label: 'Pending Review', value: '5', icon: <Clock size={22} className="text-warning" /> },
 ];
 
-const RECENT_STUDENTS = [
-  { id: '1', name: 'Ahmed Hassan', exam: 'Midterm Calculus', score: '85/100', status: 'Completed' },
-  { id: '2', name: 'Sarah Mahmoud', exam: 'Physics 101', score: 'Processing', status: 'Processing' },
-  { id: '3', name: 'Mohamed Ali', exam: 'Data Structures', score: '92/100', status: 'Completed' },
-  { id: '4', name: 'Nour El-Din', exam: 'Organic Chemistry', score: 'Processing', status: 'Processing' },
-];
+interface Template {
+  templateId: number;
+  name: string;
+  imageUrl: string;
+  width: number;
+  height: number;
+  createdAt: string;
+}
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await api.get('/templates');
+        setTemplates(response.data);
+      } catch (err) {
+        console.error('Failed to load templates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTemplates();
+  }, []);
 
   return (
     <div className="space-y-8 animate-fade-in-up">
@@ -41,16 +62,10 @@ const Dashboard: React.FC = () => {
         
         {/* Call-to-Action Buttons */}
         <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-          <Link to="/students">
-            <button className="bg-white border-2 border-primary/20 text-primary hover:bg-primary/5 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all flex items-center gap-2">
-              <UploadCloud size={18} strokeWidth={2.5} />
-              Upload Students List
-            </button>
-          </Link>
-          <Link to="/evaluate">
+          <Link to="/upload-template">
             <button className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2">
-              <PlayCircle size={18} strokeWidth={2.5} />
-              Start AI Evaluation
+              <Plus size={18} strokeWidth={2.5} />
+              Create New Exam
             </button>
           </Link>
         </div>
@@ -76,45 +91,48 @@ const Dashboard: React.FC = () => {
         
         {/* Left Column: Data Table */}
         <div className="w-full lg:w-[60%] p-8 lg:p-10 flex flex-col">
-          <h3 className="text-xl font-bold text-text-primary mb-6">Recent Evaluations</h3>
+          <h3 className="text-xl font-bold text-text-primary mb-6">My Saved Exams (Templates)</h3>
           <div className="flex-1 overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border/40 text-text-muted text-xs uppercase tracking-wider">
-                  <th className="pb-4 font-bold">Student Name</th>
-                  <th className="pb-4 font-bold">Exam</th>
-                  <th className="pb-4 font-bold">Score</th>
-                  <th className="pb-4 font-bold">Status</th>
-                  <th className="pb-4 font-bold text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/20">
-                {RECENT_STUDENTS.map((student) => (
-                  <tr key={student.id} className="hover:bg-bg-surface/50 transition-colors group">
-                    <td className="py-4 pr-4 text-sm font-bold text-text-primary">{student.name}</td>
-                    <td className="py-4 pr-4 text-sm font-medium text-text-secondary">{student.exam}</td>
-                    <td className="py-4 pr-4 text-sm font-bold text-text-primary">{student.score}</td>
-                    <td className="py-4 pr-4 text-sm">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                        student.status === 'Completed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-                      }`}>
-                        {student.status}
-                      </span>
-                    </td>
-                    <td className="py-4 text-center">
-                      <button className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
-                        <MoreVertical size={18} />
-                      </button>
-                    </td>
+            {loading ? (
+              <div className="text-center py-8 text-text-muted font-medium">Loading templates...</div>
+            ) : templates.length === 0 ? (
+              <div className="text-center py-8 text-text-muted font-medium">
+                No exams saved yet. Create a new exam template to get started!
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border/40 text-text-muted text-xs uppercase tracking-wider">
+                    <th className="pb-4 font-bold">Exam Name</th>
+                    <th className="pb-4 font-bold">Created At</th>
+                    <th className="pb-4 font-bold text-center">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="pt-6 mt-auto">
-             <button className="text-sm font-bold text-primary hover:text-primary-hover transition-colors">
-                View All Students →
-             </button>
+                </thead>
+                <tbody className="divide-y divide-border/20">
+                  {templates.map((template) => (
+                    <tr key={template.templateId} className="hover:bg-bg-surface/50 transition-colors group">
+                      <td className="py-4 pr-4 text-sm font-bold text-text-primary">{template.name}</td>
+                      <td className="py-4 pr-4 text-sm font-medium text-text-secondary">
+                        {new Date(template.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="py-4 text-center flex justify-center gap-2">
+                        {/* Currently redirecting to a generic path, to be implemented if needed */}
+                        <Link to={`/edit-template/${template.templateId}`}>
+                          <button className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="Edit Template">
+                            <Settings size={18} />
+                          </button>
+                        </Link>
+                        <Link to={`/evaluate?templateId=${template.templateId}`}>
+                          <button className="p-1.5 text-text-muted hover:text-primary hover:bg-primary/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100" title="Evaluate Papers">
+                            <PlayCircle size={18} />
+                          </button>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 

@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, Settings, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
 interface BoxCoords {
   x: number;
@@ -24,6 +26,9 @@ const UploadTemplate: React.FC = () => {
   const [examName, setExamName] = useState('');
   const [numQuestions, setNumQuestions] = useState<string>('');
   const [examImage, setExamImage] = useState<string | null>(null);
+  const [examImageFile, setExamImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   // Step 2 Payload
   const [currentQ, setCurrentQ] = useState(1);
@@ -44,7 +49,9 @@ const UploadTemplate: React.FC = () => {
   // --- Handlers ---
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const url = URL.createObjectURL(e.target.files[0]);
+      const file = e.target.files[0];
+      setExamImageFile(file);
+      const url = URL.createObjectURL(file);
       setExamImage(url);
     }
   };
@@ -54,7 +61,7 @@ const UploadTemplate: React.FC = () => {
     setStep(2);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     // Validate active question
     if (!box || box.width === 0 || !modelAnswer || !score) return;
 
@@ -93,13 +100,44 @@ const UploadTemplate: React.FC = () => {
       setScore('');
     } else {
       // Final Submission!
-      const finalPayload = {
-        examName,
-        numberOfQuestions: totalQ,
-        questions: newMapped
-      };
-      console.log('🚀 [BACKEND PAYLOAD READY] Sending to API:', finalPayload);
-      alert('Exam Template successfully mapped and saved! Check console for payload.');
+      setIsSubmitting(true);
+      try {
+        // 1. Upload Template Image
+        const formData = new FormData();
+        formData.append('name', examName);
+        if (examImageFile) {
+          formData.append('image', examImageFile);
+        }
+
+        const templateRes = await api.post('/templates', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        
+        const templateId = templateRes.data.templateId;
+
+        // 2. Map and Upload Questions
+        const questionsPayload = newMapped.map(q => ({
+          questionIndex: q.questionNumber,
+          x: q.naturalBox.x,
+          y: q.naturalBox.y,
+          width: q.naturalBox.width,
+          height: q.naturalBox.height,
+          modelAnswer: q.modelAnswer,
+          mark: parseFloat(q.score)
+        }));
+
+        await api.post(`/templates/${templateId}/questions`, {
+          questions: questionsPayload
+        });
+
+        alert('Exam Template successfully mapped and saved!');
+        navigate('/dashboard');
+      } catch (error) {
+        console.error('Failed to submit template:', error);
+        alert('Failed to save exam template. Please check the console for details.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -250,42 +288,44 @@ const UploadTemplate: React.FC = () => {
               {/* Interactive Cropper */}
               <div className="flex-1 min-h-[300px] flex flex-col relative select-none">
                 <label className="block text-sm font-bold text-text-primary mb-2">Draw Box for Question {currentQ}</label>
-                <div 
-                  ref={containerRef}
-                  className="flex-1 bg-bg-surface border border-border/60 rounded-2xl flex items-center justify-center relative overflow-hidden cursor-crosshair touch-none select-none"
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                >
-                  <img 
-                    ref={imageRef}
-                    src={examImage!} 
-                    alt="Exam Template" 
-                    className="max-w-full max-h-[600px] object-contain pointer-events-none select-none"
-                    draggable="false"
-                  />
-                  {/* Render saved boxes contextually (faded) */}
-                  {mappedQuestions.map((mq, idx) => (
-                    <div 
-                      key={idx}
-                      className="absolute border-2 border-success/40 bg-success/10 pointer-events-none flex items-center justify-center"
-                      style={{
-                        left: `${mq.visualBox.x}px`, top: `${mq.visualBox.y}px`, width: `${mq.visualBox.width}px`, height: `${mq.visualBox.height}px`
-                      }}
-                    >
-                      <span className="text-success font-bold text-xs bg-white/80 px-1 rounded">Q{mq.questionNumber}</span>
-                    </div>
-                  ))}
-                  {/* Current Active Box */}
-                  {box && box.width > 0 && box.height > 0 && (
-                    <div 
-                      className="absolute border-2 border-primary bg-primary/20 pointer-events-none"
-                      style={{
-                        left: `${box.x}px`, top: `${box.y}px`, width: `${box.width}px`, height: `${box.height}px`
-                      }}
+                <div className="flex-1 bg-bg-surface border border-border/60 rounded-2xl flex items-center justify-center overflow-hidden touch-none select-none p-4">
+                  <div 
+                    ref={containerRef}
+                    className="relative inline-block cursor-crosshair"
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <img 
+                      ref={imageRef}
+                      src={examImage!} 
+                      alt="Exam Template" 
+                      className="max-w-full max-h-[600px] pointer-events-none select-none block shadow-sm"
+                      draggable="false"
                     />
-                  )}
+                    {/* Render saved boxes contextually (faded) */}
+                    {mappedQuestions.map((mq, idx) => (
+                      <div 
+                        key={idx}
+                        className="absolute border-2 border-success/40 bg-success/10 pointer-events-none flex items-center justify-center"
+                        style={{
+                          left: `${mq.visualBox.x}px`, top: `${mq.visualBox.y}px`, width: `${mq.visualBox.width}px`, height: `${mq.visualBox.height}px`
+                        }}
+                      >
+                        <span className="text-success font-bold text-xs bg-white/80 px-1 rounded">Q{mq.questionNumber}</span>
+                      </div>
+                    ))}
+                    {/* Current Active Box */}
+                    {box && box.width > 0 && box.height > 0 && (
+                      <div 
+                        className="absolute border-2 border-primary bg-primary/20 pointer-events-none"
+                        style={{
+                          left: `${box.x}px`, top: `${box.y}px`, width: `${box.width}px`, height: `${box.height}px`
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -315,11 +355,11 @@ const UploadTemplate: React.FC = () => {
                 <div className="flex-1">
                   <button 
                     onClick={handleNextQuestion}
-                    disabled={!isStep2Valid}
+                    disabled={!isStep2Valid || isSubmitting}
                     className={`w-full py-3 rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2 h-[48px]
                       ${isStep2Valid ? 'bg-primary hover:bg-primary-hover text-white active:scale-[0.98]' : 'bg-bg-input text-text-muted cursor-not-allowed'}`}
                   >
-                    {isLastQuestion ? 'Save Exam Payload' : `Next Question (${currentQ + 1})`}
+                    {isSubmitting ? 'Saving...' : (isLastQuestion ? 'Save Exam Payload' : `Next Question (${currentQ + 1})`)}
                   </button>
                 </div>
               </div>

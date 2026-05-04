@@ -11,6 +11,7 @@ import Support from './pages/Support';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Results from './pages/Results';
+import EditTemplate from './pages/EditTemplate';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/results/:paperId" element={<Results />} />
+          <Route path="/edit-template/:templateId" element={<EditTemplate />} />
         </Route>
       </Routes>
     </BrowserRouter>
