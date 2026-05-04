@@ -11,7 +11,8 @@ public sealed class TemplateQuestionConfiguration : IEntityTypeConfiguration<Tem
         builder.HasKey(q => q.Id);
 
         builder.Property(q => q.ModelAnswer)
-            .IsRequired();
+            .IsRequired()
+            .HasMaxLength(2000);
 
         builder.Property(q => q.Mark).IsRequired();
         builder.Property(q => q.QuestionIndex).IsRequired();
@@ -19,6 +20,9 @@ public sealed class TemplateQuestionConfiguration : IEntityTypeConfiguration<Tem
         builder.Property(q => q.Y).IsRequired();
         builder.Property(q => q.Width).IsRequired();
         builder.Property(q => q.Height).IsRequired();
+
+        builder.HasIndex(q => new { q.TemplateId, q.QuestionIndex })
+            .IsUnique();
 
         builder.HasMany(q => q.StudentAnswers)
             .WithOne(a => a.Question)

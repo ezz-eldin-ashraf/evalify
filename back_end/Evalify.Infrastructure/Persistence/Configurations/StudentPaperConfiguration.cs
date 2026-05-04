@@ -25,12 +25,16 @@ public sealed class StudentPaperConfiguration : IEntityTypeConfiguration<Student
 
         builder.Property(p => p.Status)
             .IsRequired()
+            .HasMaxLength(20)
             .HasConversion(
                 s => s.ToString(),
                 s => Enum.Parse<PaperStatus>(s));
 
         builder.Property(p => p.TotalGrade).IsRequired(false);
         builder.Property(p => p.CreatedAt).IsRequired();
+
+        builder.HasIndex(p => new { p.TemplateId, p.StudentCode })
+            .IsUnique();
 
         builder.HasMany(p => p.Answers)
             .WithOne(a => a.StudentPaper)

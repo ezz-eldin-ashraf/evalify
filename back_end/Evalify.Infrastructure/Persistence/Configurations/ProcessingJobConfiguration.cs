@@ -15,6 +15,7 @@ public sealed class ProcessingJobConfiguration : IEntityTypeConfiguration<Proces
 
         builder.Property(j => j.Status)
             .IsRequired()
+            .HasMaxLength(20)
             .HasConversion(
                 s => s.ToString(),
                 s => Enum.Parse<JobStatus>(s));
