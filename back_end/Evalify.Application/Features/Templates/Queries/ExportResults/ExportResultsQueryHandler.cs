@@ -37,9 +37,13 @@ public sealed class ExportResultsQueryHandler(
             .OrderBy(p => p.StudentCode)
             .ToListAsync(ct);
 
+        var students = await db.Students
+            .Where(s => s.UserId == currentUser.Id)
+            .ToDictionaryAsync(s => s.StudentCode, s => s.FullName, ct);
+
         var sb = new StringBuilder();
 
-        sb.Append("StudentCode,");
+        sb.Append("StudentCode,FullName,");
         foreach (var q in questions)
         {
             sb.Append($"Q{q.QuestionIndex} Grade,");
@@ -51,7 +55,8 @@ public sealed class ExportResultsQueryHandler(
 
         foreach (var paper in papers)
         {
-            sb.Append($"{paper.StudentCode},");
+            var fullName = students.TryGetValue(paper.StudentCode, out var name) ? name : "Unknown";
+            sb.Append($"{paper.StudentCode},{fullName},");
 
             foreach (var question in questions)
             {

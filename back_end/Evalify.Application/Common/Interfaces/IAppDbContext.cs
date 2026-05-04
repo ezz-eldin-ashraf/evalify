@@ -3,6 +3,7 @@ using Evalify.Domain.Entities.TemplateQuestion;
 using Evalify.Domain.Entities.StudentPaper;
 using Evalify.Domain.Entities.StudentAnswer;
 using Evalify.Domain.Entities.ProcessingJob;
+using Evalify.Domain.Entities.User;
 using Microsoft.EntityFrameworkCore;
 
 namespace Evalify.Application.Common.Interfaces;
@@ -14,6 +15,7 @@ public interface IAppDbContext
     DbSet<StudentPaper> StudentPapers { get; }
     DbSet<StudentAnswer> StudentAnswers { get; }
     DbSet<ProcessingJob> ProcessingJobs { get; }
+    DbSet<Student> Students { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
