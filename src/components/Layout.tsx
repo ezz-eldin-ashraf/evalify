@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Sun
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const NAV_LINKS = [
   { to: '/dashboard',       label: 'Dashboard',        icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
@@ -35,6 +36,7 @@ const Layout: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -159,12 +161,12 @@ const Layout: React.FC = () => {
                 onClick={() => setIsProfileOpen((p) => !p)}
                 className="flex items-center gap-3 hover:opacity-90 transition-opacity text-left group"
               >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 flex-shrink-0 group-hover:border-primary/50 transition-colors">
-                  DR
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 flex-shrink-0 group-hover:border-primary/50 transition-colors uppercase">
+                  {user?.fullName?.substring(0, 2) || 'U'}
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-sm font-bold text-text-primary leading-none">Dr. Mohamed</p>
-                  <p className="text-xs text-text-muted mt-1 font-medium">Computer Science</p>
+                  <p className="text-sm font-bold text-text-primary leading-none">{user?.fullName || 'User'}</p>
+                  <p className="text-xs text-text-muted mt-1 font-medium">Instructor</p>
                 </div>
                 <ChevronDown size={16} className={`hidden md:block text-text-muted transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -174,12 +176,12 @@ const Layout: React.FC = () => {
                 <div className="absolute right-0 top-[calc(100%+12px)] w-72 bg-white rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.12)] border border-border/40 overflow-hidden z-50 animate-fade-in">
                   {/* User Info Header */}
                   <div className="p-5 bg-gradient-to-r from-primary/5 to-[#6366F1]/5 border-b border-border/40 flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0">
-                      DR
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center text-primary font-bold text-lg flex-shrink-0 uppercase">
+                      {user?.fullName?.substring(0, 2) || 'U'}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-text-primary truncate">Dr. Mohamed Ashraf</p>
-                      <p className="text-xs text-text-muted font-medium truncate mt-0.5">dr.mohamed@university.edu</p>
+                      <p className="font-bold text-text-primary truncate">{user?.fullName || 'User'}</p>
+                      <p className="text-xs text-text-muted font-medium truncate mt-0.5">{user?.email || 'user@example.com'}</p>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success/10 text-success text-[10px] font-bold mt-1.5">
                         ● Active
                       </span>
@@ -210,14 +212,17 @@ const Layout: React.FC = () => {
 
                   {/* Sign Out */}
                   <div className="p-2 border-t border-border/40">
-                    <Link
-                      to="/login"
+                    <button
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-error/10 text-text-secondary hover:text-error transition-all text-sm font-semibold"
-                      onClick={() => setIsProfileOpen(false)}
+                      onClick={() => {
+                        logout();
+                        setIsProfileOpen(false);
+                        navigate('/login');
+                      }}
                     >
                       <LogOut size={17} strokeWidth={2.5} />
                       Sign Out
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}

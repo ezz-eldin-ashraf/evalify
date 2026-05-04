@@ -9,6 +9,7 @@ import {
   PlayCircle,
   MoreVertical
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 // --- Mock Data ---
 const STATS = [
@@ -26,13 +27,15 @@ const RECENT_STUDENTS = [
 ];
 
 const Dashboard: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <div className="space-y-8 animate-fade-in-up">
       
       {/* Greeting Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-text-primary">Welcome back, Dr.mohamed 👋</h2>
+          <h2 className="text-2xl font-bold text-text-primary">Welcome back, {user?.fullName || 'User'} 👋</h2>
           <p className="text-text-muted mt-1 font-medium">Here is what's happening with your evaluations today.</p>
         </div>
         

@@ -1,11 +1,20 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './Button';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
+  
   const isLogin = location.pathname === '/login';
   const isRegister = location.pathname === '/register';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pt-6 px-4 pointer-events-none">
@@ -37,15 +46,26 @@ export const Navbar: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {!isRegister && (
-              <Link to="/register">
-                <Button variant="ghost" className="hidden sm:inline-flex rounded-full">Register</Button>
-              </Link>
-            )}
-            {!isLogin && (
-              <Link to="/login">
-                <Button variant="primary" className="rounded-full shadow-none hover:shadow-md">Log In</Button>
-              </Link>
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="hidden sm:inline-flex rounded-full">Dashboard</Button>
+                </Link>
+                <Button variant="primary" className="rounded-full shadow-none hover:shadow-md" onClick={handleLogout}>Log Out</Button>
+              </>
+            ) : (
+              <>
+                {!isRegister && (
+                  <Link to="/register">
+                    <Button variant="ghost" className="hidden sm:inline-flex rounded-full">Register</Button>
+                  </Link>
+                )}
+                {!isLogin && (
+                  <Link to="/login">
+                    <Button variant="primary" className="rounded-full shadow-none hover:shadow-md">Log In</Button>
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>

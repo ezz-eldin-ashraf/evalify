@@ -10,6 +10,9 @@ public static class ApplicationErrors
     public static Error EmailAlreadyExists =>
         Error.Conflict("Auth.EmailAlreadyExists", "Email is already registered.");
 
+    public static Error UserNotFound =>
+        Error.NotFound("Auth.UserNotFound", "User not found.");
+
     public static Error TokenGenerationFailed =>
         Error.Failure("Auth.TokenGenerationFailed", "Failed to generate token.");
 

@@ -12,8 +12,11 @@ import {
   Bell,
   CheckCircle2,
   Save,
-  X
+  X,
+  AlertCircle
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 
 interface ProfileField {
   label: string;
@@ -24,19 +27,76 @@ interface ProfileField {
 }
 
 const Profile: React.FC = () => {
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<'info' | 'security' | 'notifications'>('info');
 
   const [formData, setFormData] = useState({
-    fullName: 'Dr. Mohamed Ashraf',
-    email: 'dr.mohamed@university.edu',
-    phone: '+20 101 234 5678',
-    interests: 'Data Structures, Algorithms, AI-Assisted Evaluation',
-    joinDate: 'September 2019',
-    bio: 'Senior lecturer with over 10 years of experience in computer science education. Specializing in algorithms, data structures, and AI-assisted evaluation systems.',
+    fullName: user?.fullName || '',
+    email: user?.email || '',
   });
 
   const [editData, setEditData] = useState({ ...formData });
+
+  // Security States
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const validatePassword = (pwd: string) => {
+    if (pwd.length < 8) return "Password must be at least 8 characters long.";
+    if (!/[A-Z]/.test(pwd)) return "Password must contain at least 1 uppercase letter.";
+    if (!/[!@#$%^&*(),.?":{}|<>\-_]/.test(pwd)) return "Password must contain at least 1 symbol.";
+    if (/(0123|1234|2345|3456|4567|5678|6789)/.test(pwd)) return "Password should not contain simple sequences like 1234.";
+    return null;
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const pwd = e.target.value;
+    setNewPassword(pwd);
+    if (pwd.length > 0) {
+      setPasswordError(validatePassword(pwd));
+    } else {
+      setPasswordError(null);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    setPasswordSuccess(null);
+    const error = validatePassword(newPassword);
+    if (error) {
+      setPasswordError(error);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+    
+    setIsUpdatingPassword(true);
+    try {
+      await api.put('/auth/change-password', {
+        currentPassword,
+        newPassword
+      });
+      setPasswordSuccess("Password updated successfully.");
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setPasswordError(null);
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        setPasswordError(err.response.data.title || err.response.data.detail || "Failed to update password.");
+      } else {
+        setPasswordError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   const handleSave = () => {
     setFormData({ ...editData });
@@ -87,12 +147,11 @@ const Profile: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h3 className="text-2xl font-bold text-text-primary">{formData.fullName}</h3>
+                  <h3 className="text-2xl font-bold text-text-primary">{user?.fullName}</h3>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-bold">
                     <CheckCircle2 size={12} /> Verified
                   </span>
                 </div>
-                <p className="text-text-muted font-semibold mt-1 text-sm">{formData.interests}</p>
               </div>
             </div>
 
@@ -185,61 +244,6 @@ const Profile: React.FC = () => {
                   <p className="font-bold text-text-primary py-3.5 px-4 bg-bg-surface/50 rounded-xl">{formData.email}</p>
                 )}
               </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <Phone size={13} /> Phone Number
-                </label>
-                {isEditing ? (
-                  <input
-                    value={editData.phone}
-                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                    className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
-                  />
-                ) : (
-                  <p className="font-bold text-text-primary py-3.5 px-4 bg-bg-surface/50 rounded-xl">{formData.phone}</p>
-                )}
-              </div>
-
-              {/* Areas of Interest */}
-              <div>
-                <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <BookOpen size={13} /> Areas of Interest
-                </label>
-                {isEditing ? (
-                  <input
-                    value={editData.interests}
-                    onChange={(e) => setEditData({ ...editData, interests: e.target.value })}
-                    className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
-                  />
-                ) : (
-                  <p className="font-bold text-text-primary py-3.5 px-4 bg-bg-surface/50 rounded-xl">{formData.interests}</p>
-                )}
-              </div>
-
-              {/* Join Date — read only */}
-              <div>
-                <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <Calendar size={13} /> Member Since
-                </label>
-                <p className="font-bold text-text-primary py-3.5 px-4 bg-bg-surface/50 rounded-xl">{formData.joinDate}</p>
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">Bio</label>
-              {isEditing ? (
-                <textarea
-                  value={editData.bio}
-                  onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
-                  rows={4}
-                  className="w-full bg-bg-input font-medium text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all resize-none"
-                />
-              ) : (
-                <p className="text-text-secondary font-medium py-3.5 px-4 bg-bg-surface/50 rounded-xl leading-relaxed">{formData.bio}</p>
-              )}
             </div>
           </div>
         )}
@@ -255,27 +259,67 @@ const Profile: React.FC = () => {
               </div>
             </div>
 
+            {passwordSuccess && (
+              <div className="mb-4 p-3 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm font-medium text-center">
+                {passwordSuccess}
+              </div>
+            )}
+
             <div className="space-y-4 max-w-md">
               <div>
                 <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Key size={13} /> Current Password
                 </label>
-                <input type="password" placeholder="••••••••" className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all" />
+                <input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all" 
+                />
               </div>
               <div>
                 <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Key size={13} /> New Password
                 </label>
-                <input type="password" placeholder="••••••••" className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all" />
+                <input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={newPassword}
+                  onChange={handlePasswordChange}
+                  className={`w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border outline-none shadow-sm transition-all ${passwordError && newPassword ? 'border-error/50 focus:border-error' : 'border-transparent focus:border-primary/30'}`} 
+                />
+                {passwordError && newPassword.length > 0 && (
+                  <p className="text-error text-xs font-bold mt-2 flex items-center gap-1">
+                    <AlertCircle size={12} /> {passwordError}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
                   <Key size={13} /> Confirm New Password
                 </label>
-                <input type="password" placeholder="••••••••" className="w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all" />
+                <input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    if (e.target.value && e.target.value !== newPassword) {
+                      setPasswordError("New passwords do not match.");
+                    } else if (newPassword && !validatePassword(newPassword)) {
+                      setPasswordError(null);
+                    }
+                  }}
+                  className={`w-full bg-bg-input font-semibold text-text-primary rounded-xl py-3.5 px-4 border outline-none shadow-sm transition-all ${confirmPassword && confirmPassword !== newPassword ? 'border-error/50 focus:border-error' : 'border-transparent focus:border-primary/30'}`} 
+                />
               </div>
-              <button className="w-full bg-primary hover:bg-primary-hover text-white py-3.5 rounded-xl font-bold shadow-md transition-all active:scale-[0.98] mt-2">
-                Update Password
+              <button 
+                onClick={handleUpdatePassword}
+                disabled={!!passwordError || !currentPassword || !newPassword || !confirmPassword || isUpdatingPassword}
+                className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white py-3.5 rounded-xl font-bold shadow-md transition-all active:scale-[0.98] mt-2"
+              >
+                {isUpdatingPassword ? 'Updating...' : 'Update Password'}
               </button>
             </div>
           </div>

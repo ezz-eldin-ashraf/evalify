@@ -1,9 +1,9 @@
 import React from 'react';
-import { 
-  UploadCloud, 
-  PenTool, 
-  ClipboardCheck, 
-  Lock, 
+import {
+  UploadCloud,
+  PenTool,
+  ClipboardCheck,
+  Lock,
   Paperclip,
   Send,
   Server,
@@ -27,7 +27,7 @@ const SYSTEM_STATUS = [
 const Support: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in-up w-full">
-      
+
       {/* Top Header */}
       <div className="text-center max-w-2xl mx-auto">
         <h2 className="text-3xl font-bold text-text-primary">Support & Help Center</h2>
@@ -35,7 +35,7 @@ const Support: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-[2.5rem] shadow-strong overflow-hidden flex flex-col">
-        
+
         {/* Top Section: Categories */}
         <div className="p-8 lg:p-12 pb-10">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -56,25 +56,25 @@ const Support: React.FC = () => {
 
         {/* Bottom Section: 2 Columns */}
         <div className="flex flex-col lg:flex-row flex-1">
-          
+
           {/* Left Column: Form */}
           <div className="w-full lg:w-[65%] p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-border/40">
             <h3 className="text-xl font-bold text-text-primary mb-8">Contact Support</h3>
-            
+
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-text-primary mb-2">Full Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="e.g., Dr. Smith"
                     className="w-full bg-bg-input text-text-primary font-semibold rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-text-primary mb-2">Email</label>
-                  <input 
-                    type="email" 
+                  <input
+                    type="email"
                     placeholder="your@email.com"
                     className="w-full bg-bg-input text-text-primary font-semibold rounded-xl py-3.5 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
                   />
@@ -96,7 +96,7 @@ const Support: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-bold text-text-primary mb-2">Message</label>
-                <textarea 
+                <textarea
                   placeholder="Describe your issue in detail..."
                   className="w-full h-32 bg-bg-input text-text-primary font-semibold rounded-xl p-4 border border-transparent focus:border-primary/30 outline-none shadow-sm resize-none transition-all"
                 ></textarea>
@@ -114,8 +114,8 @@ const Support: React.FC = () => {
                   </label>
                 </div>
 
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="bg-primary hover:bg-primary-hover text-white px-8 py-3.5 rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
                   <Send size={18} />
@@ -128,7 +128,7 @@ const Support: React.FC = () => {
           {/* Right Column: System Status */}
           <div className="w-full lg:w-[35%] bg-[#F8FAFC] p-8 lg:p-12">
             <h3 className="text-xl font-bold text-text-primary mb-8">System Status</h3>
-            
+
             <div className="space-y-4">
               {SYSTEM_STATUS.map((sys) => (
                 <div key={sys.id} className="bg-white p-5 rounded-[1.25rem] border border-border/40 shadow-sm flex flex-col hover:-translate-y-0.5 transition-transform">
@@ -154,10 +154,10 @@ const Support: React.FC = () => {
             </div>
 
             <div className="mt-10 bg-primary/5 rounded-2xl p-6 border border-primary/10 text-center">
-               <p className="text-sm font-medium text-text-primary leading-relaxed">
-                 Need immediate emergency assistance?<br/>
-                 <span className="text-primary font-bold block mt-2 text-lg">+1 (800) EVALIFY</span>
-               </p>
+              <p className="text-sm font-medium text-text-primary leading-relaxed">
+                Need immediate emergency assistance?<br />
+                <span className="text-primary font-bold block mt-2 text-lg">+1 (800) EVALIFY</span>
+              </p>
             </div>
 
           </div>

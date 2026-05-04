@@ -1,9 +1,12 @@
 using Asp.Versioning;
 using Evalify.API.Contracts.Requests;
+using Evalify.Application.Features.Auth.Commands.ChangePassword;
 using Evalify.Application.Features.Auth.Commands.Register;
 using Evalify.Application.Features.Auth.Queries.Login;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Evalify.API.Controllers;
 
@@ -46,6 +49,30 @@ public sealed class AuthController(ISender sender) : ApiController
 
         return result.Match(
             response => Ok(response),
+            Problem);
+    }
+
+    [Authorize]
+    [HttpPut("change-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [EndpointSummary("Change the current user's password.")]
+    [EndpointName("ChangePassword")]
+    [MapToApiVersion("1.0")]
+    public async Task<IActionResult> ChangePassword(
+        ChangePasswordRequest request,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await sender.Send(
+            new ChangePasswordCommand(userId, request.CurrentPassword, request.NewPassword), ct);
+
+        return result.Match(
+            _ => Ok(),
             Problem);
     }
 }

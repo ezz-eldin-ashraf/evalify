@@ -1,10 +1,51 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
+import { useAuth } from '../contexts/AuthContext';
+import api from '../api/axios';
 
 const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await api.post('/auth/login', {
+        email,
+        password
+      });
+      
+      const { token, userId, fullName, email: userEmail } = response.data;
+      
+      login({
+        token,
+        userId,
+        fullName,
+        email: userEmail
+      });
+      
+      navigate('/dashboard');
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        setError(err.response.data.title || err.response.data.detail || 'Login failed');
+      } else {
+        setError('An error occurred during login. Please try again later.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF]">
@@ -25,7 +66,13 @@ const Login: React.FC = () => {
             </p>
           </div>
 
-          <form className="space-y-5">
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium text-center">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-5" onSubmit={handleLogin}>
             {/* Email Input */}
             <div>
               <div className="relative flex items-center">
@@ -35,6 +82,9 @@ const Login: React.FC = () => {
                 <input 
                   type="email" 
                   placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="w-full bg-bg-input text-text-primary placeholder-gray-400 text-sm font-semibold border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-xl py-3.5 pl-11 pr-4 transition-all duration-300 outline-none shadow-sm"
                 />
               </div>
@@ -49,6 +99,9 @@ const Login: React.FC = () => {
                 <input 
                   type={showPassword ? "text" : "password"} 
                   placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="w-full bg-bg-input text-text-primary placeholder-gray-400 text-sm font-semibold border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-xl py-3.5 pl-11 pr-11 transition-all duration-300 outline-none shadow-sm"
                 />
                 <button 
@@ -70,10 +123,11 @@ const Login: React.FC = () => {
             {/* Login Action */}
             <div className="pt-2">
               <button 
-                type="button" 
-                className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
+                type="submit" 
+                disabled={loading}
+                className="w-full flex justify-center items-center bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Log In
+                {loading ? 'Logging in...' : 'Log In'}
               </button>
             </div>
           </form>
