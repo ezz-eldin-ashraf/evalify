@@ -31,4 +31,22 @@ public sealed class User : IdentityUser
 
         return user;
     }
+
+    public Result<bool> UpdateProfile(string fullName, string email)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return UserErrors.FullNameRequired;
+
+        if (fullName.Length > 100)
+            return UserErrors.FullNameTooLong;
+
+        if (string.IsNullOrWhiteSpace(email))
+            return UserErrors.EmailRequired;
+
+        FullName = fullName.Trim();
+        Email = email.Trim();
+        UserName = email.Trim();
+
+        return true;
+    }
 }

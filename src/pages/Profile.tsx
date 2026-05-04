@@ -27,9 +27,11 @@ interface ProfileField {
 }
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'info' | 'security' | 'notifications'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'security'>('info');
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
@@ -98,13 +100,34 @@ const Profile: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    setFormData({ ...editData });
-    setIsEditing(false);
+  const handleSave = async () => {
+    setProfileError(null);
+    setIsSavingProfile(true);
+    try {
+      const response = await api.put('/auth/profile', {
+        fullName: editData.fullName,
+        email: editData.email
+      });
+      
+      // Update global context and local storage with new info and new token
+      login(response.data);
+      
+      setFormData({ fullName: response.data.fullName, email: response.data.email });
+      setIsEditing(false);
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        setProfileError(err.response.data.title || err.response.data.detail || "Failed to update profile.");
+      } else {
+        setProfileError("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleCancel = () => {
     setEditData({ ...formData });
+    setProfileError(null);
     setIsEditing(false);
   };
 
@@ -117,7 +140,6 @@ const Profile: React.FC = () => {
   const TABS = [
     { key: 'info',          label: 'Personal Info',   icon: <User size={16} /> },
     { key: 'security',      label: 'Security',        icon: <Shield size={16} /> },
-    { key: 'notifications', label: 'Notifications',   icon: <Bell size={16} /> },
   ] as const;
 
   return (
@@ -158,7 +180,10 @@ const Profile: React.FC = () => {
             {/* Edit Button */}
             {!isEditing ? (
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setEditData({ ...formData });
+                  setIsEditing(true);
+                }}
                 className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-xl font-bold shadow-md transition-all active:scale-[0.98] md:mb-2"
               >
                 <Edit3 size={16} strokeWidth={2.5} />
@@ -166,11 +191,11 @@ const Profile: React.FC = () => {
               </button>
             ) : (
               <div className="flex gap-3 md:mb-2">
-                <button onClick={handleCancel} className="flex items-center gap-2 bg-bg-input hover:bg-gray-100 text-text-secondary px-5 py-2.5 rounded-xl font-bold transition-all">
+                <button onClick={handleCancel} disabled={isSavingProfile} className="flex items-center gap-2 bg-bg-input hover:bg-gray-100 disabled:opacity-50 text-text-secondary px-5 py-2.5 rounded-xl font-bold transition-all">
                   <X size={16} strokeWidth={2.5} /> Cancel
                 </button>
-                <button onClick={handleSave} className="flex items-center gap-2 bg-success hover:bg-success/90 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all">
-                  <Save size={16} strokeWidth={2.5} /> Save Changes
+                <button onClick={handleSave} disabled={isSavingProfile} className="flex items-center gap-2 bg-success hover:bg-success/90 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-bold shadow-md transition-all">
+                  <Save size={16} strokeWidth={2.5} /> {isSavingProfile ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             )}
@@ -211,6 +236,11 @@ const Profile: React.FC = () => {
         {/* ── Tab: Personal Info ── */}
         {activeTab === 'info' && (
           <div className="p-8 md:p-12 space-y-6 animate-fade-in">
+            {profileError && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm font-medium text-center">
+                {profileError}
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Full Name */}
               <div>
@@ -322,29 +352,6 @@ const Profile: React.FC = () => {
                 {isUpdatingPassword ? 'Updating...' : 'Update Password'}
               </button>
             </div>
-          </div>
-        )}
-
-        {/* ── Tab: Notifications ── */}
-        {activeTab === 'notifications' && (
-          <div className="p-8 md:p-12 space-y-5 animate-fade-in">
-            {[
-              { label: 'Evaluation Completed',    sub: 'Notify me when an AI evaluation finishes',     on: true  },
-              { label: 'New Student Submission',  sub: 'Alert when a student submits their paper',      on: true  },
-              { label: 'System Maintenance',      sub: 'Updates on server downtime or maintenance',     on: false },
-              { label: 'Weekly Report Summary',   sub: 'Receive a weekly digest of evaluation stats',  on: true  },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-5 bg-bg-surface/60 rounded-2xl border border-border/40">
-                <div>
-                  <p className="font-bold text-text-primary text-sm">{item.label}</p>
-                  <p className="text-xs text-text-muted font-medium mt-0.5">{item.sub}</p>
-                </div>
-                {/* Toggle */}
-                <div className={`relative w-12 h-6 rounded-full transition-colors duration-300 cursor-pointer flex-shrink-0 ${item.on ? 'bg-primary' : 'bg-border'}`}>
-                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${item.on ? 'translate-x-7' : 'translate-x-1'}`} />
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </div>

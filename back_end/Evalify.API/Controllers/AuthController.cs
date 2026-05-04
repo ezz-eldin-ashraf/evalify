@@ -1,6 +1,8 @@
 using Asp.Versioning;
 using Evalify.API.Contracts.Requests;
 using Evalify.Application.Features.Auth.Commands.ChangePassword;
+using Evalify.Application.Features.Auth.Commands.UpdateProfile;
+using Evalify.Application.Features.Auth.Commands.ChangePassword;
 using Evalify.Application.Features.Auth.Commands.Register;
 using Evalify.Application.Features.Auth.Queries.Login;
 using MediatR;
@@ -73,6 +75,30 @@ public sealed class AuthController(ISender sender) : ApiController
 
         return result.Match(
             _ => Ok(),
+            Problem);
+    }
+
+    [Authorize]
+    [HttpPut("profile")]
+    [ProducesResponseType(typeof(UpdateProfileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [EndpointSummary("Update the current user's profile.")]
+    [EndpointName("UpdateProfile")]
+    [MapToApiVersion("1.0")]
+    public async Task<IActionResult> UpdateProfile(
+        UpdateProfileRequest request,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await sender.Send(
+            new UpdateProfileCommand(userId, request.FullName, request.Email), ct);
+
+        return result.Match(
+            response => Ok(response),
             Problem);
     }
 }

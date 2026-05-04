@@ -18,16 +18,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    // Check if user is logged in
+  const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('token');
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
+      try {
+        return JSON.parse(storedUser);
+      } catch (e) {
+        return null;
+      }
     }
-  }, []);
+    return null;
+  });
 
   const login = (userData: User) => {
     setUser(userData);
