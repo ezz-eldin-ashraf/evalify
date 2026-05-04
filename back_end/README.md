@@ -1,6 +1,7 @@
 # Evalify System
 # Evalify — Frontend Developer Guide
 
+
 ## What is Evalify?
 
 Evalify is an AI-powered platform that allows teachers to automatically evaluate handwritten student exam answers. The teacher uploads scanned answer sheets, defines where each question's answer is on the sheet, provides a model answer, and the system grades everything automatically.
