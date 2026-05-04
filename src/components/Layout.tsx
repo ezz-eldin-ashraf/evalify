@@ -14,12 +14,14 @@ import {
   BarChart2,
   User,
   ChevronDown,
-  Sun
+  Sun,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const NAV_LINKS = [
   { to: '/dashboard',       label: 'Dashboard',        icon: <LayoutDashboard size={20} strokeWidth={2.5} /> },
+  { to: '/exams',           label: 'Exams',            icon: <BookOpen size={20} strokeWidth={2.5} /> },
   { to: '/upload-template', label: 'Upload Template',  icon: <FileUp size={20} strokeWidth={2.5} /> },
   { to: '/students',        label: 'Students Lists',   icon: <Users size={20} strokeWidth={2.5} /> },
   { to: '/evaluate',        label: 'Start Evaluation', icon: <PlayCircle size={20} strokeWidth={2.5} /> },
@@ -57,6 +59,7 @@ const Layout: React.FC = () => {
   const getPageTitle = () => {
     const map: Record<string, string> = {
       '/dashboard':       'Overview',
+      '/exams':           'My Exams',
       '/upload-template': 'Upload Template',
       '/students':        'Students Lists',
       '/evaluate':        'Start Evaluation',
@@ -64,7 +67,7 @@ const Layout: React.FC = () => {
       '/support':         'Support & Help Center',
       '/profile':         'My Profile',
     };
-    return map[location.pathname] ?? (location.pathname.includes('/results') ? 'Evaluation Results' : 'Dashboard');
+    return map[location.pathname] ?? (location.pathname.includes('/results') ? 'Evaluation Results' : location.pathname.includes('/edit-template') ? 'Edit Template' : 'Dashboard');
   };
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);

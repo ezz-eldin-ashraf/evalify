@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
-import { UploadCloud, FileSpreadsheet, File, X, CheckCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { UploadCloud, FileSpreadsheet, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import api from '../api/axios';
 
-// Mock parser interface for frontend simulation
 interface StudentData {
-  id: string;
+  id: string | number;
   name: string;
   code: string;
 }
@@ -12,8 +12,33 @@ const StudentsList: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [parsedData, setParsedData] = useState<StudentData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch existing students on mount
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await api.get('/students');
+        // Map backend names to frontend interface if needed
+        const mappedData = res.data.map((s: any) => ({
+          id: s.id,
+          name: s.fullName || s.name,
+          code: s.studentCode || s.code,
+        }));
+        setParsedData(mappedData);
+      } catch (err) {
+        console.error('Failed to load students:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -27,19 +52,45 @@ const StudentsList: React.FC = () => {
 
   const processFile = (file: File) => {
     setExcelFile(file);
-    setIsParsing(true);
+    setError(null);
+    setSuccessMsg(null);
+    // Since parsing happens on the backend, we just hold the file here
+    // and wait for the user to click "Save Student Database"
+  };
+
+  const handleSaveToBackend = async () => {
+    if (!excelFile) return;
     
-    // Simulate Excel/CSV parsing delay
-    setTimeout(() => {
-      setParsedData([
-        { id: '1', name: 'Ahmed Hassan', code: 'STU-2026-001' },
-        { id: '2', name: 'Sarah Mahmoud', code: 'STU-2026-002' },
-        { id: '3', name: 'Mohamed Ali', code: 'STU-2026-003' },
-        { id: '4', name: 'Nour El-Din', code: 'STU-2026-004' },
-        { id: '5', name: 'Youssef Tariq', code: 'STU-2026-005' },
-      ]);
-      setIsParsing(false);
-    }, 1500);
+    setIsUploading(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', excelFile);
+
+      const res = await api.post('/students/roster', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setSuccessMsg(`Successfully imported ${res.data?.insertedCount || res.data?.parsedCount || 'all'} students!`);
+      setExcelFile(null);
+      
+      // Refresh list
+      const fetchRes = await api.get('/students');
+      const mappedData = fetchRes.data.map((s: any) => ({
+        id: s.id,
+        name: s.fullName || s.name,
+        code: s.studentCode || s.code,
+      }));
+      setParsedData(mappedData);
+      
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.title || err.response?.data?.detail || 'Failed to upload roster.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -71,6 +122,20 @@ const StudentsList: React.FC = () => {
           <p className="text-text-muted mt-2 font-medium">Upload your class roster via Excel or CSV to map identities to graded papers.</p>
         </div>
       </div>
+
+      {/* Feedback Messages */}
+      {successMsg && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 rounded-xl px-5 py-4 font-semibold text-sm">
+          <CheckCircle size={20} />
+          {successMsg}
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-600 rounded-xl px-5 py-4 font-semibold text-sm">
+          <AlertCircle size={20} />
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -133,10 +198,18 @@ const StudentsList: React.FC = () => {
 
                 <div className="mt-6 pt-6 border-t border-border/40">
                   <button 
-                    className="w-full bg-secondary hover:bg-secondary-hover text-white py-3 rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2"
-                    disabled={isParsing || parsedData.length === 0}
+                    onClick={handleSaveToBackend}
+                    disabled={isUploading}
+                    className="w-full bg-secondary hover:bg-secondary-hover disabled:opacity-60 text-white py-3 rounded-xl font-bold shadow-md transition-all flex items-center justify-center gap-2"
                   >
-                    Save Student Database
+                    {isUploading ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Uploading Roster...
+                      </>
+                    ) : (
+                      'Save Student Database'
+                    )}
                   </button>
                 </div>
               </div>
@@ -161,15 +234,15 @@ const StudentsList: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-x-auto bg-bg-surface/30">
-              {isParsing ? (
-                <div className="w-full h-full flex flex-col items-center justify-center py-20">
-                  <div className="w-10 h-10 border-4 border-secondary/20 border-t-secondary rounded-full animate-spin mb-4"></div>
-                  <p className="text-sm font-bold text-text-secondary animate-pulse">Extracting rows from spreadsheet...</p>
+              {loading ? (
+                <div className="w-full h-full flex flex-col items-center justify-center py-20 text-text-muted">
+                  <Loader2 size={32} className="animate-spin mb-4 text-secondary" />
+                  <p className="text-sm font-bold">Loading students database...</p>
                 </div>
               ) : parsedData.length === 0 ? (
                 <div className="w-full h-full flex flex-col items-center justify-center py-20 opacity-50">
                   <FileSpreadsheet size={48} className="text-text-muted mb-4" strokeWidth={1.5} />
-                  <p className="text-sm font-bold text-text-muted">Awaiting Excel Upload</p>
+                  <p className="text-sm font-bold text-text-muted">Database empty. Awaiting Excel Upload.</p>
                 </div>
               ) : (
                 <table className="w-full text-left border-collapse animate-fade-in">

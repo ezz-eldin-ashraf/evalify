@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Results from './pages/Results';
 import EditTemplate from './pages/EditTemplate';
+import Exams from './pages/Exams';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         {/* Protected Routes placeholder */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/exams" element={<Exams />} />
           <Route path="/upload-template" element={<UploadTemplate />} />
           <Route path="/evaluate" element={<Evaluate />} />
           <Route path="/students" element={<StudentsList />} />
