@@ -106,12 +106,10 @@ public sealed class TemplatesController(ISender sender) : ApiController
 [MapToApiVersion("1.0")]
 public async Task<IActionResult> UploadPapers(
     int templateId,
-    [FromForm] IFormFileCollection images,
+    [FromForm] List<IFormFile> images,
     CancellationToken ct)
     {
-        var files = Request.Form.Files.Count > 0
-    ? Request.Form.Files.Cast<IFormFile>().ToList()
-    : images?.ToList() ?? [];
+        var files = images?.Count > 0 ? images : (Request.Form.Files.Count > 0 ? Request.Form.Files.Cast<IFormFile>().ToList() : new List<IFormFile>());
     
         if (files.Count == 0)
             return BadRequest("At least one image is required.");

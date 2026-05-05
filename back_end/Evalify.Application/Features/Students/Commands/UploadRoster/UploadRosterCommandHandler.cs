@@ -19,6 +19,12 @@ public sealed class UploadRosterCommandHandler(
     {
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
+        var listExists = await db.StudentLists
+            .AnyAsync(l => l.Id == request.StudentListId && l.UserId == currentUser.Id, ct);
+            
+        if (!listExists)
+            return Error.NotFound("StudentList.NotFound", "Student list not found or access denied.");
+
         var ext = Path.GetExtension(request.FileName).ToLowerInvariant();
         using var reader = ext == ".csv"
             ? ExcelReaderFactory.CreateCsvReader(request.FileStream)
@@ -39,7 +45,7 @@ public sealed class UploadRosterCommandHandler(
             return Error.Validation("Roster.InvalidFormat", "File must have at least two columns: Name and StudentCode.");
 
         var existingStudents = await db.Students
-            .Where(s => s.UserId == currentUser.Id)
+            .Where(s => s.StudentListId == request.StudentListId)
             .ToDictionaryAsync(s => s.StudentCode, ct);
 
         int parsed = 0;
@@ -66,7 +72,7 @@ public sealed class UploadRosterCommandHandler(
             }
             else
             {
-                var newStudent = Student.Create(currentUser.Id, code, name);
+                var newStudent = Student.Create(request.StudentListId, code, name);
                 db.Students.Add(newStudent);
                 existingStudents[code] = newStudent;
                 inserted++;

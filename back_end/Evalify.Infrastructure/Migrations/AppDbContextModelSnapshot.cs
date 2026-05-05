@@ -232,16 +232,42 @@ namespace Evalify.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("StudentListId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentListId", "StudentCode")
+                        .IsUnique();
+
+                    b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("Evalify.Domain.Entities.User.StudentList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "StudentCode")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Students");
+                    b.ToTable("StudentLists");
                 });
 
             modelBuilder.Entity("Evalify.Domain.Entities.User.User", b =>
@@ -513,8 +539,19 @@ namespace Evalify.Infrastructure.Migrations
 
             modelBuilder.Entity("Evalify.Domain.Entities.User.Student", b =>
                 {
-                    b.HasOne("Evalify.Domain.Entities.User.User", "Teacher")
+                    b.HasOne("Evalify.Domain.Entities.User.StudentList", "StudentList")
                         .WithMany("Students")
+                        .HasForeignKey("StudentListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StudentList");
+                });
+
+            modelBuilder.Entity("Evalify.Domain.Entities.User.StudentList", b =>
+                {
+                    b.HasOne("Evalify.Domain.Entities.User.User", "Teacher")
+                        .WithMany("StudentLists")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -592,9 +629,14 @@ namespace Evalify.Infrastructure.Migrations
                     b.Navigation("StudentAnswers");
                 });
 
-            modelBuilder.Entity("Evalify.Domain.Entities.User.User", b =>
+            modelBuilder.Entity("Evalify.Domain.Entities.User.StudentList", b =>
                 {
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("Evalify.Domain.Entities.User.User", b =>
+                {
+                    b.Navigation("StudentLists");
 
                     b.Navigation("Templates");
                 });

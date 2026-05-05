@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Evalify.Application.Features.Students.Queries.GetStudents;
 
-public record GetStudentsQuery() : IRequest<Result<List<StudentDto>>>;
+public record GetStudentsQuery(int StudentListId) : IRequest<Result<List<StudentDto>>>;

@@ -18,12 +18,12 @@ public sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
             .IsRequired()
             .HasMaxLength(150);
 
-        builder.HasIndex(x => new { x.UserId, x.StudentCode })
+        builder.HasIndex(x => new { x.StudentListId, x.StudentCode })
             .IsUnique();
 
-        builder.HasOne(s => s.Teacher)
+        builder.HasOne(s => s.StudentList)
             .WithMany(u => u.Students)
-            .HasForeignKey(s => s.UserId)
+            .HasForeignKey(s => s.StudentListId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

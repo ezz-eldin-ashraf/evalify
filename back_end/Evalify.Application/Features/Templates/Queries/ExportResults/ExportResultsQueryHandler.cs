@@ -38,7 +38,10 @@ public sealed class ExportResultsQueryHandler(
             .ToListAsync(ct);
 
         var students = await db.Students
-            .Where(s => s.UserId == currentUser.Id)
+            .Include(s => s.StudentList)
+            .Where(s => s.StudentList!.UserId == currentUser.Id)
+            .GroupBy(s => s.StudentCode)
+            .Select(g => g.First())
             .ToDictionaryAsync(s => s.StudentCode, s => s.FullName, ct);
 
         var sb = new StringBuilder();

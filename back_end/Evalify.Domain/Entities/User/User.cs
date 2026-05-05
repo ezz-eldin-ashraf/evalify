@@ -9,7 +9,7 @@ public sealed class User : IdentityUser
     public DateTime CreatedAt { get; private set; }
 
     public ICollection<Template.Template> Templates { get; private set; } = [];
-    public ICollection<Student> Students { get; private set; } = [];
+    public ICollection<StudentList> StudentLists { get; private set; } = [];
 
     public static Result<User> Create(string fullName, string email)
     {
