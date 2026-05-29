@@ -120,13 +120,10 @@ const Reports: React.FC = () => {
   const toggleExpand = useCallback(async (idx: number) => {
     setReports(prev => {
       const copy = [...prev];
-      const r = { ...copy[idx] };
-      r.expanded = !r.expanded;
-      copy[idx] = r;
+      copy[idx] = { ...copy[idx], expanded: !copy[idx].expanded };
       return copy;
     });
 
-    // Load papers if not yet loaded
     const report = reports[idx];
     if (!report.expanded && report.papers.length === 0 && !report.loading) {
       setReports(prev => {
@@ -136,11 +133,36 @@ const Reports: React.FC = () => {
       });
       try {
         const res = await api.get(`/templates/${report.template.templateId}/papers`);
+
+        // Auto-select student list saved from Evaluate page
+        const savedListId = localStorage.getItem(`evalify_list_${report.template.templateId}`);
+
         setReports(prev => {
           const copy = [...prev];
-          copy[idx] = { ...copy[idx], papers: res.data ?? [], loading: false };
+          copy[idx] = {
+            ...copy[idx],
+            papers: res.data ?? [],
+            loading: false,
+            selectedListId: savedListId ?? copy[idx].selectedListId,
+          };
           return copy;
         });
+
+        // If there's a saved list, resolve names immediately
+        if (savedListId) {
+          try {
+            const sRes = await api.get(`/student-lists/${savedListId}/students`);
+            const map: Record<string, string> = {};
+            (sRes.data ?? []).forEach((s: { studentCode: string; fullName: string }) => {
+              map[s.studentCode] = s.fullName;
+            });
+            setReports(prev => {
+              const copy = [...prev];
+              copy[idx] = { ...copy[idx], studentMap: map };
+              return copy;
+            });
+          } catch { /* silent */ }
+        }
       } catch {
         setReports(prev => {
           const copy = [...prev];

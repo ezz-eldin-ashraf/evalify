@@ -108,18 +108,8 @@ const ExamCard: React.FC<ExamCardProps> = ({ template, papers }) => {
   const pendingPapers = papers.filter((p) => p.status === 'Pending').length;
   const failedPapers = papers.filter((p) => p.status === 'Failed').length;
 
-  const COLORS = [
-    '#6C63FF', '#FF6584', '#43C59E', '#FF9F43', '#54A0FF',
-    '#5F27CD', '#EE5A24', '#009432', '#0652DD', '#D63031',
-  ];
-  const cardAccent = COLORS[template.templateId % COLORS.length];
-
   return (
-    <div className="bg-white rounded-[2rem] shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-border/30 overflow-hidden hover:shadow-[0_8px_40px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-0.5 group">
-
-      {/* Accent bar */}
-      <div className="h-1.5 w-full" style={{ background: `linear-gradient(90deg, ${cardAccent}, ${cardAccent}88)` }} />
-
+    <div className="bg-white rounded-[1.5rem] border border-border/60 hover:shadow-strong hover:border-primary/20 transition-all duration-300 hover:-translate-y-0.5 group overflow-hidden">
       <div className="p-6">
         {/* ── Top Row: Image + Info ── */}
         <div className="flex gap-5">

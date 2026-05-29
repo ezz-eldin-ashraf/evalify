@@ -1,0 +1,176 @@
+### ============================================================
+### Evalify API - End-to-End Test
+### ============================================================
+### INSTRUCTIONS:
+### 1. اتبع الـ steps بالترتيب
+### 2. بعد Login → انسخ token والصقه في @token
+### 3. بعد Create Template → انسخ templateId والصقه في @templateId
+### 4. بعد Upload Paper → انسخ studentPaperId والصقه في @paperId
+###
+### الصور:
+###   templateTest.png  → template (الورقة الفاضية)
+###   20220001.jpg      → student paper (اسم الملف = كود الطالب)
+###
+### الـ bounding boxes:
+###   Q1: x=100, y=100, width=650, height=250
+###   Q2: x=100, y=400, width=650, height=250
+### ============================================================
+
+@baseUrl = https://localhost:7065
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkOGVlOGQ2Ny0yYTBlLTQyYWMtYTJiNC02YmUzZmE3ZDEwYjQiLCJlbWFpbCI6InRlYWNoZXJAdGVzdC5jb20iLCJuYW1lIjoiVGVzdCBUZWFjaGVyIiwianRpIjoiYWJiNjRmNmEtZDdjMC00NzU0LTk5MzEtNjM0ZTFjM2JhMjkzIiwiZXhwIjoxNzc5NTA3NTc2LCJpc3MiOiJFdmFsaWZ5IiwiYXVkIjoiRXZhbGlmeVVzZXJzIn0.xz2BPlIy7rRTdAeK5miogvwrBWHa7zN1zJWBaaXwEu4
+@templateId = 21
+@paperId = 36
+
+
+### ============================================================
+### STEP 1 — Register
+### ============================================================
+
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Test Teacher",
+  "email": "teacher@test.com",
+  "password": "Test123!"
+}
+
+###
+
+### ============================================================
+### STEP 2 — Login → انسخ token من الـ response
+### ============================================================
+
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "teacher@test.com",
+  "password": "Test123!"
+}
+
+###
+
+### ============================================================
+### STEP 3 — Create Template
+### انسخ templateId من الـ response
+### عدّل المسار لو مختلف عندك
+### ============================================================
+
+POST {{baseUrl}}/api/v1/templates
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="name"
+
+Computer Science Exam Template
+------Boundary
+Content-Disposition: form-data; name="image"; filename="templateTest.png"
+Content-Type: image/png
+
+< D:\final\AI service\Evalify-main\templateTest.png
+------Boundary--
+
+###
+
+### ============================================================
+### STEP 4 — Save Questions (bounding boxes)
+### Q1: Image Segmentation question
+### Q2: Index Representation question
+### ============================================================
+
+POST {{baseUrl}}/api/v1/templates/{{templateId}}/questions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "questions": [
+    {
+      "questionIndex": 1,
+      "x": 60,
+      "y": 100,
+      "width": 700,
+      "height": 260,
+      "modelAnswer": "Image segmentation is the process of dividing an image into different regions or segments to simplify analysis and identify objects",
+      "mark": 10.0,
+      "gradingMode": "Meaning"
+    },
+    {
+      "questionIndex": 2,
+      "x": 60,
+      "y": 560,
+      "width": 700,
+      "height": 170,
+      "modelAnswer": "The possible ways for index representation are term document matrix and inverted index",
+      "mark": 10.0,
+      "gradingMode": "Meaning"
+    }
+  ]
+}
+###
+
+### ============================================================
+### STEP 5 — Upload Student Paper
+### اسم الملف = كود الطالب (20220001)
+### انسخ studentPaperId من الـ response
+### ============================================================
+
+POST {{baseUrl}}/api/v1/templates/{{templateId}}/papers
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----Boundary
+
+------Boundary
+Content-Disposition: form-data; name="images"; filename="202200017.jpg"
+Content-Type: image/jpeg
+
+< D:\final\AI service\Evalify-main\202200017.jpg
+------Boundary--
+
+###
+
+### ============================================================
+### STEP 6 — Get Papers (تابع الـ status)
+### Pending → Processing → Done
+### شغّله أكتر من مرة لحد ما يبقى Done
+### ============================================================
+
+GET {{baseUrl}}/api/v1/templates/{{templateId}}/papers
+Authorization: Bearer {{token}}
+
+###
+
+### ============================================================
+### STEP 7 — Get Results
+### شغّله بعد ما status يبقى Done
+### هتشوف: grade, extracted_text, totalGrade
+### ============================================================
+
+GET {{baseUrl}}/api/v1/papers/{{paperId}}/results
+Authorization: Bearer {{token}}
+
+###
+
+### ============================================================
+### STEP 8 — Adjust Grade (اختياري)
+### عدّل answerId بالـ id الحقيقي من الـ results
+### ============================================================
+
+PUT {{baseUrl}}/api/v1/answers/39/grade
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "grade": 8.0
+}
+
+###
+
+### ============================================================
+### STEP 9 — Export CSV
+### ============================================================
+
+GET {{baseUrl}}/api/v1/templates/{{templateId}}/export
+Authorization: Bearer {{token}}
+
+###
