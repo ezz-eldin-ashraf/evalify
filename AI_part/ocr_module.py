@@ -1,5 +1,10 @@
 import os
-os.environ["PADDLEOCR_HOME"] = r"D:\final\AI service\Evalify-main\root\.paddlex"
+import sys
+
+ai_part_dir = os.path.dirname(os.path.abspath(__file__))
+paddlex_home = os.path.join(ai_part_dir, "OCR MODEL", "root", ".paddlex")
+
+os.environ["PADDLEOCR_HOME"] = paddlex_home
 os.environ["PADDLE_PDX_MODEL_SOURCE"] = "BOS"
 
 # pyrefly: ignore [missing-import]
@@ -7,18 +12,25 @@ from paddleocr import PaddleOCR
 # pyrefly: ignore [missing-import]
 from spellchecker import SpellChecker
 
-BASE = r"D:\final\AI service\Evalify-main\root\.paddlex\official_models"
+BASE = os.path.join(paddlex_home, "official_models")
+det_dir = os.path.join(BASE, "PP-OCRv5_server_det", "inference")
+rec_dir = os.path.join(BASE, "PP-OCRv5_server_rec_infer")
 
-ocr = PaddleOCR(
-    use_doc_orientation_classify=False,
-    use_doc_unwarping=False,
-    use_textline_orientation=False,
-    text_detection_model_dir=rf"{BASE}\PP-OCRv5_server_det\inference",
-    text_recognition_model_dir=rf"{BASE}\PP-OCRv5_server_rec_infer",
-    det_db_thresh=0.2,        # ← أقل عشان يشوف أكتر
-    det_db_box_thresh=0.4,    # ← أقل عشان يشوف أكتر
-    det_db_unclip_ratio=2.0,  # ← أكبر عشان يوسع الـ boxes
-)
+ocr_kwargs = {
+    "use_doc_orientation_classify": False,
+    "use_doc_unwarping": False,
+    "use_textline_orientation": False,
+    "det_db_thresh": 0.2,
+    "det_db_box_thresh": 0.4,
+    "det_db_unclip_ratio": 2.0
+}
+
+# Use local models only if the directories actually exist
+if os.path.exists(det_dir) and os.path.exists(rec_dir):
+    ocr_kwargs["text_detection_model_dir"] = det_dir
+    ocr_kwargs["text_recognition_model_dir"] = rec_dir
+
+ocr = PaddleOCR(**ocr_kwargs)
 
 spell = SpellChecker()
 

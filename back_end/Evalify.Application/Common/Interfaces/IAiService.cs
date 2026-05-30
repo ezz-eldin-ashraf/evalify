@@ -1,3 +1,5 @@
+using Evalify.Domain.Enums;
+
 namespace Evalify.Application.Common.Interfaces;
 
 public interface IAiService
@@ -6,6 +8,7 @@ public interface IAiService
         Stream croppedImageStream,
         string modelAnswer,
         double maxMark,
+        GradingMode gradingMode,
         CancellationToken ct);
 }
 

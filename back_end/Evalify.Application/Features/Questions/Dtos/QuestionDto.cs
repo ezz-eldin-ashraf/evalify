@@ -1,3 +1,5 @@
+using Evalify.Domain.Enums;
+
 namespace Evalify.Application.Features.Questions.Dtos;
 
 public sealed record QuestionDto(
@@ -8,4 +10,5 @@ public sealed record QuestionDto(
     int Width,
     int Height,
     string ModelAnswer,
-    double Mark);
+    double Mark,
+    GradingMode GradingMode);

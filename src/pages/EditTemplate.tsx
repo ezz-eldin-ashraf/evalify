@@ -21,11 +21,13 @@ interface Question {
   height: number;
   modelAnswer: string;
   mark: number;
+  gradingMode: string;
 }
 
 interface EditableQuestion extends Question {
   editModelAnswer: string;
   editMark: string;
+  editGradingMode: string;
 }
 
 const EditTemplate: React.FC = () => {
@@ -67,6 +69,7 @@ const EditTemplate: React.FC = () => {
           ...q,
           editModelAnswer: q.modelAnswer,
           editMark: String(q.mark),
+          editGradingMode: q.gradingMode || 'Meaning',
         }));
         setQuestions(qs);
         if (qs.length > 0) setSelectedQ(qs[0].questionIndex);
@@ -112,7 +115,7 @@ const EditTemplate: React.FC = () => {
 
   const handleFieldChange = (
     index: number,
-    field: 'editModelAnswer' | 'editMark',
+    field: 'editModelAnswer' | 'editMark' | 'editGradingMode',
     value: string
   ) => {
     setQuestions((prev) =>
@@ -134,6 +137,7 @@ const EditTemplate: React.FC = () => {
         height: q.height,
         modelAnswer: q.editModelAnswer,
         mark: parseFloat(q.editMark) || 0,
+        gradingMode: q.editGradingMode,
       }));
 
       await api.post(`/templates/${templateId}/questions`, {
@@ -146,6 +150,7 @@ const EditTemplate: React.FC = () => {
           ...q,
           modelAnswer: q.editModelAnswer,
           mark: parseFloat(q.editMark) || 0,
+          gradingMode: q.editGradingMode,
         }))
       );
 
@@ -395,21 +400,40 @@ const EditTemplate: React.FC = () => {
                   </div>
 
                   {/* Score */}
-                  <div>
-                    <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
-                      Score (Max Mark)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={q.editMark}
-                      onChange={(e) => handleFieldChange(idx, 'editMark', e.target.value)}
-                      className="w-full bg-bg-input text-text-primary font-bold text-lg rounded-xl py-4 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
-                    />
-                    <p className="text-xs text-text-muted font-medium mt-2">
-                      Currently: {q.mark} pts
-                    </p>
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
+                        Score (Max Mark)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={q.editMark}
+                        onChange={(e) => handleFieldChange(idx, 'editMark', e.target.value)}
+                        className="w-full bg-bg-input text-text-primary font-bold text-lg rounded-xl py-4 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
+                      />
+                      <p className="text-xs text-text-muted font-medium mt-2">
+                        Currently: {q.mark} pts
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-text-muted uppercase tracking-wider mb-2">
+                        Grading Mode
+                      </label>
+                      <select
+                        value={q.editGradingMode}
+                        onChange={(e) => handleFieldChange(idx, 'editGradingMode', e.target.value)}
+                        className="w-full bg-bg-input text-text-primary font-bold text-base rounded-xl py-4 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all appearance-none"
+                      >
+                        <option value="Meaning">Meaning</option>
+                        <option value="Strict">Strict</option>
+                      </select>
+                      <p className="text-xs text-text-muted font-medium mt-2">
+                        Currently: {q.gradingMode}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

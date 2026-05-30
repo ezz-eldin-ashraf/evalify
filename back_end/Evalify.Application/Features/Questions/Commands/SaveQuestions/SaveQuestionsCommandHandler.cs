@@ -29,6 +29,16 @@ public sealed class SaveQuestionsCommandHandler(
             .Where(q => q.TemplateId == request.TemplateId)
             .ToListAsync(ct);
 
+        var templatePaperIds = await db.StudentPapers
+            .Where(p => p.TemplateId == request.TemplateId)
+            .Select(p => p.Id)
+            .ToListAsync(ct);
+
+        var existingAnswers = await db.StudentAnswers
+            .Where(a => templatePaperIds.Contains(a.StudentPaperId))
+            .ToListAsync(ct);
+
+        db.StudentAnswers.RemoveRange(existingAnswers);
         db.TemplateQuestions.RemoveRange(existing);
 
         var errors = new List<Error>();
@@ -44,7 +54,8 @@ public sealed class SaveQuestionsCommandHandler(
                 item.Width,
                 item.Height,
                 item.ModelAnswer,
-                item.Mark);
+                item.Mark,
+                item.GradingMode);
 
             if (result.IsError)
             {

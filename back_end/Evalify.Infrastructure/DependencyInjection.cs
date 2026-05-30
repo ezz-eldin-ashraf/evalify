@@ -36,6 +36,11 @@ public static class DependencyInjection
 
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IFileStorage, FileStorageService>();
+        services.AddHttpClient("PythonAi", client =>
+        {
+            client.BaseAddress = new Uri(configuration["AiService:BaseUrl"] ?? "http://localhost:5001");
+            client.Timeout = TimeSpan.FromSeconds(300);
+        });
         services.AddScoped<IAiService, AiService>();
         services.AddHostedService<PaperProcessingService>();
 

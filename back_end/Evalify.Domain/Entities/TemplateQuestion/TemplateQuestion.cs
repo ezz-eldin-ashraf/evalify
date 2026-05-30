@@ -1,4 +1,5 @@
 using Evalify.Domain.Common.Results;
+using Evalify.Domain.Enums;
 
 namespace Evalify.Domain.Entities.TemplateQuestion;
 
@@ -15,6 +16,7 @@ public sealed class TemplateQuestion
     public int Height { get; private set; }
     public string ModelAnswer { get; private set; } = string.Empty;
     public double Mark { get; private set; }
+    public GradingMode GradingMode { get; private set; }
 
     public Template.Template? Template { get; private set; }
     public ICollection<StudentAnswer.StudentAnswer> StudentAnswers { get; private set; } = [];
@@ -27,7 +29,8 @@ public sealed class TemplateQuestion
         int width,
         int height,
         string modelAnswer,
-        double mark)
+        double mark,
+        GradingMode gradingMode)
     {
         if (questionIndex <= 0)
             return TemplateQuestionErrors.InvalidQuestionIndex;
@@ -53,7 +56,8 @@ public sealed class TemplateQuestion
             Width = width,
             Height = height,
             ModelAnswer = modelAnswer.Trim(),
-            Mark = mark
+            Mark = mark,
+            GradingMode = gradingMode
         };
     }
 

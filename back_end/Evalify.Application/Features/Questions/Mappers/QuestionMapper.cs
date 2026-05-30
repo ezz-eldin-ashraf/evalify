@@ -17,7 +17,8 @@ public static class QuestionMapper
             entity.Width,
             entity.Height,
             entity.ModelAnswer,
-            entity.Mark);
+            entity.Mark,
+            entity.GradingMode);
     }
 
     public static List<QuestionDto> ToDtos(this IEnumerable<TemplateQuestion> entities)

@@ -1,4 +1,5 @@
 using Evalify.Domain.Common.Results;
+using Evalify.Domain.Enums;
 using MediatR;
 
 namespace Evalify.Application.Features.Questions.Commands.SaveQuestions;
@@ -14,4 +15,5 @@ public sealed record QuestionItem(
     int Width,
     int Height,
     string ModelAnswer,
-    double Mark);
+    double Mark,
+    GradingMode GradingMode);

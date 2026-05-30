@@ -77,7 +77,7 @@ public sealed class TemplatesController(ISender sender) : ApiController
     {
         var questions = request.Questions
             .Select(q => new QuestionItem(
-                q.QuestionIndex, q.X, q.Y, q.Width, q.Height, q.ModelAnswer, q.Mark))
+                q.QuestionIndex, q.X, q.Y, q.Width, q.Height, q.ModelAnswer, q.Mark, q.GradingMode))
             .ToList();
 
         var result = await sender.Send(new SaveQuestionsCommand(templateId, questions), ct);

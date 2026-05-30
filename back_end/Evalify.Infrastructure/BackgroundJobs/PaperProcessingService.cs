@@ -148,6 +148,7 @@ public sealed class PaperProcessingService(
                         croppedStream,
                         question.ModelAnswer,
                         question.Mark,
+                        question.GradingMode,
                         ct);
 
                     if (!aiResult.Success)

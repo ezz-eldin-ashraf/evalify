@@ -1,4 +1,5 @@
 using Evalify.Domain.Entities.TemplateQuestion;
+using Evalify.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,6 +16,12 @@ public sealed class TemplateQuestionConfiguration : IEntityTypeConfiguration<Tem
             .HasMaxLength(2000);
 
         builder.Property(q => q.Mark).IsRequired();
+        builder.Property(q => q.GradingMode)
+            .IsRequired()
+            .HasConversion(
+                g => g.ToString(),
+                g => Enum.Parse<GradingMode>(g))
+            .HasDefaultValue(GradingMode.Meaning);
         builder.Property(q => q.QuestionIndex).IsRequired();
         builder.Property(q => q.X).IsRequired();
         builder.Property(q => q.Y).IsRequired();

@@ -16,6 +16,7 @@ interface QuestionData {
   visualBox: BoxCoords;
   modelAnswer: string;
   score: string;
+  gradingMode: string;
 }
 
 const UploadTemplate: React.FC = () => {
@@ -38,6 +39,7 @@ const UploadTemplate: React.FC = () => {
   const [box, setBox] = useState<BoxCoords | null>(null);
   const [modelAnswer, setModelAnswer] = useState('');
   const [score, setScore] = useState('');
+  const [gradingMode, setGradingMode] = useState('Meaning');
 
   // Drawing Engine State
   const [isDrawing, setIsDrawing] = useState(false);
@@ -83,7 +85,8 @@ const UploadTemplate: React.FC = () => {
       naturalBox: finalBox,
       visualBox: { ...box },
       modelAnswer,
-      score
+      score,
+      gradingMode
     };
 
     // Save to array
@@ -98,6 +101,7 @@ const UploadTemplate: React.FC = () => {
       setBox(null);
       setModelAnswer('');
       setScore('');
+      setGradingMode('Meaning');
     } else {
       // Final Submission!
       setIsSubmitting(true);
@@ -123,7 +127,8 @@ const UploadTemplate: React.FC = () => {
           width: q.naturalBox.width,
           height: q.naturalBox.height,
           modelAnswer: q.modelAnswer,
-          mark: parseFloat(q.score)
+          mark: parseFloat(q.score),
+          gradingMode: q.gradingMode
         }));
 
         await api.post(`/templates/${templateId}/questions`, {
@@ -341,7 +346,7 @@ const UploadTemplate: React.FC = () => {
               </div>
 
               <div className="flex items-end gap-4">
-                <div className="w-1/3">
+                <div className="w-1/4">
                   <label className="block text-sm font-bold text-text-primary mb-2">Score</label>
                   <input 
                     type="number" 
@@ -351,6 +356,17 @@ const UploadTemplate: React.FC = () => {
                     placeholder="e.g., 5"
                     className="w-full bg-bg-input text-text-primary font-semibold rounded-xl py-3 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all"
                   />
+                </div>
+                <div className="w-1/4">
+                  <label className="block text-sm font-bold text-text-primary mb-2">Mode</label>
+                  <select 
+                    value={gradingMode}
+                    onChange={(e) => setGradingMode(e.target.value)}
+                    className="w-full bg-bg-input text-text-primary font-semibold rounded-xl py-3 px-4 border border-transparent focus:border-primary/30 outline-none shadow-sm transition-all appearance-none"
+                  >
+                    <option value="Meaning">Meaning</option>
+                    <option value="Strict">Strict</option>
+                  </select>
                 </div>
                 <div className="flex-1">
                   <button 
