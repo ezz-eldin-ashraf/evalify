@@ -131,11 +131,7 @@ const Profile: React.FC = () => {
     setIsEditing(false);
   };
 
-  const STATS = [
-    { label: 'Total Exams',      value: '25'  },
-    { label: 'Students Graded', value: '250' },
-    { label: 'Evaluations Done',value: '126' },
-  ];
+
 
   const TABS = [
     { key: 'info',          label: 'Personal Info',   icon: <User size={16} /> },
@@ -160,7 +156,9 @@ const Profile: React.FC = () => {
             <div className="flex items-center gap-6">
               <div className="relative inline-block">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center shadow-lg">
-                  <span className="text-3xl font-bold text-primary">DR</span>
+                  <span className="text-3xl font-bold text-primary uppercase">
+                    {user?.fullName?.substring(0, 2) || 'U'}
+                  </span>
                 </div>
                 <label className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md cursor-pointer hover:bg-primary-hover transition-colors">
                   <Camera size={14} className="text-white" strokeWidth={2.5} />
@@ -201,15 +199,7 @@ const Profile: React.FC = () => {
             )}
           </div>
 
-          {/* Quick Stats Row */}
-          <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-border/40">
-            {STATS.map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="text-2xl font-bold text-text-primary">{stat.value}</p>
-                <p className="text-xs text-text-muted font-semibold mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+
         </div>
       </div>
 
