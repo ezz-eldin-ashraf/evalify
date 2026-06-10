@@ -81,6 +81,12 @@ const Dashboard: React.FC = () => {
           <p className="text-text-muted mt-1 font-medium">Here is what's happening with your evaluations today.</p>
         </div>
         <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
+          <Link to="/evaluate">
+            <button className="bg-bg-surface hover:bg-gray-50 text-text-primary px-8 py-3 rounded-2xl font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 border border-border/60">
+              <PlayCircle size={20} strokeWidth={2.5} />
+              Start Evaluation
+            </button>
+          </Link>
           <Link to="/upload-template">
             <button className="bg-gradient-to-r from-primary to-primary-hover hover:brightness-110 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 border border-primary/20">
               <Plus size={20} strokeWidth={2.5} />

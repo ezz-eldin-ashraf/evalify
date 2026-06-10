@@ -85,7 +85,7 @@ const Reports: React.FC = () => {
   const [exportingId, setExportingId] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  // ── Initial load: templates + student lists ──────────────────────────────
+  // ── Initial load: templates + student lists + papers ─────────────────────
   useEffect(() => {
     const load = async () => {
       try {
@@ -97,15 +97,37 @@ const Reports: React.FC = () => {
         const lists: StudentList[] = lRes.data;
         setStudentLists(lists);
 
-        const initial: TemplateReport[] = templates.map(t => ({
-          template: t,
-          papers: [],
-          loading: false,
-          expanded: false,
-          selectedListId: '',
-          studentMap: {},
-          searchQuery: '',
+        // Fetch papers for all templates upfront to show accurate global totals
+        const papersResults = await Promise.allSettled(
+          templates.map(t => api.get(`/templates/${t.templateId}/papers`))
+        );
+
+        const initial: TemplateReport[] = await Promise.all(templates.map(async (t, idx) => {
+          const res = papersResults[idx];
+          const papers = res.status === 'fulfilled' ? (res.value.data ?? []) : [];
+          const savedListId = localStorage.getItem(`evalify_list_${t.templateId}`) || '';
+          
+          let studentMap: Record<string, string> = {};
+          if (savedListId) {
+            try {
+              const sRes = await api.get(`/student-lists/${savedListId}/students`);
+              (sRes.data ?? []).forEach((s: { studentCode: string; fullName: string }) => {
+                studentMap[s.studentCode] = s.fullName;
+              });
+            } catch { /* silent */ }
+          }
+
+          return {
+            template: t,
+            papers,
+            loading: false,
+            expanded: false,
+            selectedListId: savedListId,
+            studentMap,
+            searchQuery: '',
+          };
         }));
+        
         setReports(initial);
       } catch {
         setError('Failed to load templates. Please refresh the page.');
@@ -116,62 +138,14 @@ const Reports: React.FC = () => {
     load();
   }, []);
 
-  // ── Expand / collapse: load papers on first open ──────────────────────────
-  const toggleExpand = useCallback(async (idx: number) => {
+  // ── Expand / collapse ───────────────────────────────────────────────────
+  const toggleExpand = useCallback((idx: number) => {
     setReports(prev => {
       const copy = [...prev];
       copy[idx] = { ...copy[idx], expanded: !copy[idx].expanded };
       return copy;
     });
-
-    const report = reports[idx];
-    if (!report.expanded && report.papers.length === 0 && !report.loading) {
-      setReports(prev => {
-        const copy = [...prev];
-        copy[idx] = { ...copy[idx], loading: true };
-        return copy;
-      });
-      try {
-        const res = await api.get(`/templates/${report.template.templateId}/papers`);
-
-        // Auto-select student list saved from Evaluate page
-        const savedListId = localStorage.getItem(`evalify_list_${report.template.templateId}`);
-
-        setReports(prev => {
-          const copy = [...prev];
-          copy[idx] = {
-            ...copy[idx],
-            papers: res.data ?? [],
-            loading: false,
-            selectedListId: savedListId ?? copy[idx].selectedListId,
-          };
-          return copy;
-        });
-
-        // If there's a saved list, resolve names immediately
-        if (savedListId) {
-          try {
-            const sRes = await api.get(`/student-lists/${savedListId}/students`);
-            const map: Record<string, string> = {};
-            (sRes.data ?? []).forEach((s: { studentCode: string; fullName: string }) => {
-              map[s.studentCode] = s.fullName;
-            });
-            setReports(prev => {
-              const copy = [...prev];
-              copy[idx] = { ...copy[idx], studentMap: map };
-              return copy;
-            });
-          } catch { /* silent */ }
-        }
-      } catch {
-        setReports(prev => {
-          const copy = [...prev];
-          copy[idx] = { ...copy[idx], loading: false };
-          return copy;
-        });
-      }
-    }
-  }, [reports]);
+  }, []);
 
   // ── Select a student list to resolve student names ──────────────────────
   const selectList = useCallback(async (idx: number, listId: string) => {

@@ -18,12 +18,6 @@ const CATEGORIES = [
   { id: 4, title: 'Account & Login', subtitle: 'Password and access', icon: <Lock size={24} /> },
 ];
 
-const SYSTEM_STATUS = [
-  { id: 1, label: 'AI Server', status: 'Online', color: 'text-success', icon: <Server size={18} className="text-text-muted" /> },
-  { id: 2, label: 'OCR Engine', status: 'Running', color: 'text-success', icon: <Cpu size={18} className="text-text-muted" /> },
-  { id: 3, label: 'Database', status: 'Connected', color: 'text-success', icon: <Database size={18} className="text-text-muted" /> },
-];
-
 const Support: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in-up w-full">
@@ -58,7 +52,7 @@ const Support: React.FC = () => {
         <div className="flex flex-col lg:flex-row flex-1">
 
           {/* Left Column: Form */}
-          <div className="w-full lg:w-[65%] p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-border/40">
+          <div className="w-full p-8 lg:p-12">
             <h3 className="text-xl font-bold text-text-primary mb-8">Contact Support</h3>
 
             <form className="space-y-6">
@@ -123,43 +117,6 @@ const Support: React.FC = () => {
                 </button>
               </div>
             </form>
-          </div>
-
-          {/* Right Column: System Status */}
-          <div className="w-full lg:w-[35%] bg-[#F8FAFC] p-8 lg:p-12">
-            <h3 className="text-xl font-bold text-text-primary mb-8">System Status</h3>
-
-            <div className="space-y-4">
-              {SYSTEM_STATUS.map((sys) => (
-                <div key={sys.id} className="bg-white p-5 rounded-[1.25rem] border border-border/40 shadow-sm flex flex-col hover:-translate-y-0.5 transition-transform">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                        {sys.icon}
-                      </div>
-                      <span className="font-bold text-text-primary">{sys.label}</span>
-                    </div>
-                    <div className="flex items-center gap-2 bg-success/10 px-2.5 py-1 rounded-full">
-                      <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-                      <span className="text-xs font-bold text-success">{sys.status}</span>
-                    </div>
-                  </div>
-                  <div className="w-full h-px bg-border/40 my-1"></div>
-                  <div className="mt-3 text-xs text-text-muted font-medium flex justify-between">
-                    <span>Latency: &lt; 20ms</span>
-                    <span>Last checked: Just now</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-10 bg-primary/5 rounded-2xl p-6 border border-primary/10 text-center">
-              <p className="text-sm font-medium text-text-primary leading-relaxed">
-                Need immediate emergency assistance?<br />
-                <span className="text-primary font-bold block mt-2 text-lg">+1 (800) EVALIFY</span>
-              </p>
-            </div>
-
           </div>
         </div>
 

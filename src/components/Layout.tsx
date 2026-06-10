@@ -240,11 +240,10 @@ const Layout: React.FC = () => {
           </div>
 
           {/* Minimal Footer */}
-          <footer className="h-20 mt-auto border-t border-border/40 bg-white px-8 flex items-center justify-between text-sm text-text-muted shrink-0">
-            <p>© 2026 Evalify. All rights reserved.</p>
-            <div className="hidden md:flex items-center gap-6 font-medium">
-              <Link to="/support" className="hover:text-primary transition-colors">Support Center</Link>
+          <footer className="h-20 mt-auto border-t border-border/40 bg-white px-8 flex items-center justify-center text-sm text-text-muted shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 font-medium text-center">
               <Link to="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <p>© 2026 Evalify. All rights reserved.</p>
               <Link to="#" className="hover:text-primary transition-colors">Terms of Service</Link>
             </div>
           </footer>

@@ -119,7 +119,6 @@ const Evaluate: React.FC = () => {
             <h3 className="text-lg font-bold text-text-primary mb-4 flex items-center gap-2">
               <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-bold">2</span>
               Students Roster
-              <span className="text-xs font-bold text-error ml-1">* Required</span>
             </h3>
             <div className="relative">
               <Users size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
@@ -132,11 +131,6 @@ const Evaluate: React.FC = () => {
               </select>
               <ChevronDown size={20} className="absolute right-5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
             </div>
-            {!isLoading && selectedList === '' && (
-              <p className="mt-2 text-xs font-semibold text-error flex items-center gap-1">
-                <AlertCircle size={12} /> A student roster is required to link papers to names.
-              </p>
-            )}
           </div>
         </div>
 
